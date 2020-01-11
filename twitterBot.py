@@ -15,7 +15,7 @@ now = datetime.now()
 date_now = now.strftime('%Y-%m-%d %H:%M:%S')
 
 # Global Vriables
-globalsleep = 120
+globalsleep = 20
 
 # gets all of our data from the config file.
 with open('config.json', 'r') as config_file:
@@ -196,11 +196,11 @@ def follow_keyword(followers, following, total_followed, whitelisted_users, blac
              print(date_now)
              print('Starting to follow users who tweeted \'{}\''.format(i))
              telegram_send.send(messages=['>>>Twitter: Starting to follow users who tweeted \'{}\''.format(i)])
-                print('>>Started with Followers: ' + str(len(api.followers_ids(screen_name))))
-                print('>>Started with Following: ' + str(len(api.friends_ids(screen_name))))
+             print('>>Started with Followers: ' + str(len(api.followers_ids(screen_name))))
+             print('>>Started with Following: ' + str(len(api.friends_ids(screen_name))))
              for i in range(0, len(searched_screen_names) - 1):
+              if total_followed <= 10:
                 try:
-                   if total_followed <= 10:
                     # follows the user.
                     api.create_friendship(searched_screen_names[i])
                     total_followed += 1
@@ -216,44 +216,36 @@ def follow_keyword(followers, following, total_followed, whitelisted_users, blac
                     print('Followed user. Sleeping ', globalsleep, ' seconds. Count: ', str(total_followed))
                     #telegram_send.send(messages=['>>>Twitter: ' 'Followed user. Sleeping 60 seconds.'])
                     sleep(globalsleep)
-                   else:
-                    #print(date_now)
-                    #print('countn = ' + str(total_unfollowed))
-                              print(date_now)
-                              print('Starting to unfollow users...')
-                              telegram_send.send(messages=['>>>Twitter: ' 'Starting to unfollow users...'])
-                              # makes a new list of users who don't follow you back.
-                              non_mutuals = set(following) - set(followers) - set(whitelisted_users)
-                              for f in non_mutuals:
-                                  try:
-                                    if total_unfollowed <= 10:
-                                      # unfollows non follower.
-                                      api.destroy_friendship(f)
-                                      total_unfollowed += 1
-                                      total_followed -= 1
-                                      if total_unfollowed % 10 == 0:
-                                          print(date_now)
-                                          print(str(total_unfollowed) + ' unfollowed so far.')
-                                          print('>>Followers: ' + str(len(api.followers_ids(screen_name))))
-                                          print('>>Following: ' + str(len(api.friends_ids(screen_name))))
-                                          telegram_send.send(messages=['>>>Twitter: ' (str(total_unfollowed) + ' unfollowed so far.')])
-                                          telegram_send.send(messages=['>>>Twitter: ' '>>Followers: ' + str(len(api.followers_ids(screen_name)))])
-                                          telegram_send.send(messages=['>>>Twitter: ' '>>Following: ' + str(len(api.friends_ids(screen_name)))])
-                                      elif total_followed <= 2:
-                                          break
-                                      print(date_now)
-                                      print('Unfollowed user. Sleeping ', globalsleep ,' seconds. Count: ', str(total_unfollowed))
-                                      #telegram_send.send(messages=['>>>Twitter: ' 'Unfollowed user. Sleeping 60 seconds.'])
-                                      sleep(globalsleep)
-                                  except (tweepy.RateLimitError, tweepy.TweepError) as e:
-                                      error_handling(e)
-                              print(date_now)
-                              print('Total Unfollowed start: ', total_unfollowed)
-
                 except (tweepy.RateLimitError, tweepy.TweepError) as e:
                     error_handling(e)
+              else:
+                   print(date_now)
+                   print('Starting to unfollow users...')
+                   # makes a new list of users who don't follow you back.
+                   non_mutuals = set(following) - set(followers) - set(whitelisted_users)
+                   total_followed = len(non_mutuals)
+                   for f in non_mutuals:
+                       try:
+                           # unfollows non follower.
+                           api.destroy_friendship(f)
+                           total_followed -= 1
+                           if total_followed % 10 == 0:
+                               print(date_now)
+                               print(str(total_followed) + ' users Unfollowed so far.')
+                               print('>>Followers: ' + str(len(api.followers_ids(screen_name))))
+                               print('>>Following: ' + str(len(api.friends_ids(screen_name))))
+                               telegram_send.send(messages=['>>>Twitter:' + str(total_followed) + ' users Unfollowed so far.' ])
+                               telegram_send.send(messages=['>>>Twitter:' 'Followers: ' + str(len(api.followers_ids(screen_name)))])
+                               telegram_send.send(messages=['>>>Twitter:' 'Following: ' + str(len(api.friends_ids(screen_name)))])
+                           print(date_now)
+                           print('Unfollowed user. Sleeping ', globalsleep, ' seconds. Count: ', str(total_followed))
+                           sleep(globalsleep)
+                       except (tweepy.RateLimitError, tweepy.TweepError) as e:
+                           error_handling(e)
+                   print(date_now)
+                   print(total_followed)
              print(date_now)
-             print('Total Followed start: ', total_followed)
+             #print('Total Followed start: ', total_followed)
 
 
 # function to follow users who retweeted a tweet.
