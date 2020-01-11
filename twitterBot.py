@@ -15,7 +15,8 @@ now = datetime.now()
 date_now = now.strftime('%Y-%m-%d %H:%M:%S')
 
 # Global Vriables
-globalsleep = 20
+globalsleep = 120
+#globalsleep = 20
 
 # gets all of our data from the config file.
 with open('config.json', 'r') as config_file:
@@ -199,7 +200,7 @@ def follow_keyword(followers, following, total_followed, whitelisted_users, blac
              print('>>Started with Followers: ' + str(len(api.followers_ids(screen_name))))
              print('>>Started with Following: ' + str(len(api.friends_ids(screen_name))))
              for i in range(0, len(searched_screen_names) - 1):
-              if total_followed <= 10:
+              if total_followed <= 300:
                 try:
                     # follows the user.
                     api.create_friendship(searched_screen_names[i])
@@ -231,10 +232,10 @@ def follow_keyword(followers, following, total_followed, whitelisted_users, blac
                            total_followed -= 1
                            if total_followed % 10 == 0:
                                print(date_now)
-                               print(str(total_followed) + ' users Unfollowed so far.')
+                               print(str(total_followed) + ' users Unfollowed left.')
                                print('>>Followers: ' + str(len(api.followers_ids(screen_name))))
                                print('>>Following: ' + str(len(api.friends_ids(screen_name))))
-                               telegram_send.send(messages=['>>>Twitter:' + str(total_followed) + ' users Unfollowed so far.' ])
+                               telegram_send.send(messages=['>>>Twitter:' + str(total_followed) + ' users Unfollowed left.' ])
                                telegram_send.send(messages=['>>>Twitter:' 'Followers: ' + str(len(api.followers_ids(screen_name)))])
                                telegram_send.send(messages=['>>>Twitter:' 'Following: ' + str(len(api.friends_ids(screen_name)))])
                            print(date_now)
